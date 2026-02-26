@@ -20,6 +20,10 @@ Parameters:
     Type: String
     Default: Infrastructure EC2 Name
 
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: acs-keys
+
 Resources:
   InstanceRole:
     Type: AWS::IAM::Role
@@ -50,6 +54,11 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Security group for EC2 instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -62,12 +71,35 @@ Resources:
     Properties:
       InstanceType: !Ref InstanceType
       ImageId: !Ref ImageId
+      KeyName: !Ref KeyName
       IamInstanceProfile: !Ref InstanceProfile
       SecurityGroupIds:
         - !Ref SecurityGroup
       Tags:
         - Key: Name
           Value: !Sub '${Name}-server'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -e
+
+          # Update system
+          dnf update -y
+
+          # Install Docker
+          dnf install -y docker
+          systemctl start docker
+          systemctl enable docker
+          usermod -aG docker ec2-user
+
+          # Install Docker Compose v2 plugin
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+            -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+          # Symlink for legacy 'docker-compose' command (optional)
+          ln -s /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 Outputs:
   InstanceId:

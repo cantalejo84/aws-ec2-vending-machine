@@ -59,9 +59,6 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: !Sub '${Name}-security-group'
@@ -77,7 +74,7 @@ Resources:
         - !Ref SecurityGroup
       Tags:
         - Key: Name
-          Value: !Ref Name
+          Value: !Sub '${Name}-server'
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash

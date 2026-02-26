@@ -83,6 +83,9 @@ Resources:
           # Update system
           dnf update -y
 
+          # Install git
+          dnf install -y git
+
           # Install Docker
           dnf install -y docker
           systemctl start docker

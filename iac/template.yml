@@ -74,7 +74,7 @@ Resources:
         - !Ref SecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub '${Name}-server'
+          Value: !Ref Name
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -83,29 +83,31 @@ Resources:
           # Update system
           dnf update -y
 
-          # Install git
-          dnf install -y git
-
-          # Install Docker
-          dnf install -y docker
+          # Install Docker and Git
+          dnf install -y docker git
           systemctl start docker
           systemctl enable docker
           usermod -aG docker ec2-user
 
           # Install Docker Compose v2 plugin
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+          curl -SL "https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64" \
             -o /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-          # Symlink for legacy 'docker-compose' command (optional)
+          # Symlink for legacy 'docker-compose' command
           ln -s /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+
+          # Install Docker Buildx plugin
+          curl -SL "https://github.com/docker/buildx/releases/download/v0.21.0/buildx-v0.21.0.linux-amd64" \
+            -o /usr/local/lib/docker/cli-plugins/docker-buildx
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
 
 Outputs:
   InstanceId:
     Description: Instance ID of the EC2 instance
     Value: !Ref Instance
-    
+
   PublicIP:
     Description: Public IP address of the EC2 instance
     Value: !GetAtt Instance.PublicIp

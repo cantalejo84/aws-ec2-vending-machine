@@ -15,6 +15,9 @@ Actions → Deploy EC2 → Run workflow:
 | `action` | `deploy` |
 | `stack_name` | e.g. `opcua-demo` |
 | `instance_type` | **t3.small** (default) |
+| `os` | **`amazon-linux`** (only supported value — install scripts use `dnf`) |
+
+> The `os` input also accepts `ubuntu`, but the workflow fails fast on this branch — the install scripts are Amazon-Linux-only.
 
 ## Install the server
 

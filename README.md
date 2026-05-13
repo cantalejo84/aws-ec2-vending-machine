@@ -11,6 +11,9 @@ Actions → Deploy EC2 → Run workflow:
 | `action` | `deploy` |
 | `stack_name` | e.g. `my-docker-ec2` |
 | `instance_type` | t3.micro / **t3.small** / t3.medium |
+| `os` | **`amazon-linux`** (only supported value — UserData uses `dnf`) |
+
+> The `os` input also accepts `ubuntu`, but the workflow fails fast on this branch — the UserData is Amazon-Linux-only. Use the `ec2-default` branch if you need an Ubuntu base.
 
 ## Connect
 

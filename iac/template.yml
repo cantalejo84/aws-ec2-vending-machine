@@ -8,8 +8,7 @@ Parameters:
     AllowedValues: [t3.micro, t3.small, t3.medium]
 
   ImageId:
-    Type: String
-    Default: ami-080ecf65f4d838a6e
+    Type: AWS::EC2::Image::Id
 
 Resources:
   InstanceRole:

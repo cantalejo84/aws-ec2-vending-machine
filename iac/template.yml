@@ -34,6 +34,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: !Sub '${AWS::StackName} security group'
+      VpcId: !ImportValue vpc-id
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -47,8 +48,12 @@ Resources:
       InstanceType: !Ref InstanceType
       ImageId: !Ref ImageId
       IamInstanceProfile: !Ref InstanceProfile
-      SecurityGroupIds:
-        - !Ref SecurityGroup
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          SubnetId: !ImportValue subnet-public-a-id
+          GroupSet:
+            - !Ref SecurityGroup
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}'

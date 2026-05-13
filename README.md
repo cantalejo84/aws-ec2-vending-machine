@@ -1,33 +1,30 @@
-# aws-ec2-vending-machine
+# ec2-default
 
-One-click EC2 deployments via GitHub Actions. Each branch is a self-contained deployment type.
+Bare EC2 instance with SSM access. No software preinstalled. Use this as the starting point for new flavors.
 
-## Branches
+## What you get
 
-| Branch | Workload | Open ports | Install |
-|---|---|---|---|
-| `docker-compose` | Docker + Compose v2 + Buildx | none (SSM only) | auto (UserData) |
-| `opcua-server` | OPC UA demo server (node-opcua) | 4840/tcp | manual (scripts) |
-| `greengrass-v2` | AWS IoT Greengrass v2 core device | none (SSM only) | WIP |
+- EC2 instance (default `t3.small`)
+- IAM role with `AmazonSSMManagedInstanceCore` (connect via Session Manager)
+- Security group with egress only (no inbound)
+- Outputs: `InstanceId`, `PublicIP`
 
-## Setup
+## Deploy
 
-Add to GitHub repository secrets:
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
+Actions → Deploy EC2 → Run workflow:
 
-Region: `eu-west-1` (change `AWS_REGION` in the workflow to override).
+- `stack_name` — CloudFormation stack name
+- `instance_type` — `t3.micro` / `t3.small` / `t3.medium`
+- `os` — `amazon-linux` (Amazon Linux 2023) or `ubuntu` (Ubuntu 26.04 LTS), both x86_64
 
-## Usage
+Region is fixed to `eu-west-1`. AMI IDs are hardcoded in the workflow (see `Resolve AMI` step) — edit the workflow to bump to a newer image.
 
-1. Switch to the branch for the EC2 type you want
-2. Actions → Deploy EC2 → Run workflow
-3. Set `stack_name` and `instance_type`
-4. To tear down: same workflow with `action = destroy`
+## Destroy
 
-## Adding a new branch
+Same workflow with `action = destroy`.
 
-1. `git checkout -b <new-type>` from this branch
-2. Add `iac/template.yml` (CloudFormation)
-3. Add `installation/` scripts if needed
-4. Write `README.md`
+## Connect
+
+```
+aws ssm start-session --target <InstanceId> --region eu-west-1
+```

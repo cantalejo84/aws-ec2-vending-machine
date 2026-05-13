@@ -18,6 +18,12 @@ on:
         default: 't3.small'
         type: choice
         options: [t3.micro, t3.small, t3.medium]
+      os:
+        description: 'Base OS (x86_64, latest)'
+        required: true
+        default: 'amazon-linux'
+        type: choice
+        options: [amazon-linux, ubuntu]
 
 env:
   AWS_REGION: eu-west-1
@@ -35,6 +41,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Resolve AMI
+        if: ${{ inputs.action == 'deploy' }}
+        id: ami
+        run: |
+          # AMIs pinned for eu-west-1, x86_64. Update manually to pick up newer images.
+          case "${{ inputs.os }}" in
+            amazon-linux) AMI_ID=ami-03a25ed280b358f5b ;;     # Amazon Linux 2023
+            ubuntu)       AMI_ID=ami-0de864d6a3bd20ea8 ;;     # Ubuntu 26.04 LTS
+          esac
+          echo "Selected AMI for ${{ inputs.os }}: $AMI_ID"
+          echo "ami_id=$AMI_ID" >> "$GITHUB_OUTPUT"
+
       - name: Deploy stack
         if: ${{ inputs.action == 'deploy' }}
         uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -42,7 +60,7 @@ jobs:
           name: ${{ inputs.stack_name }}
           template: ${{ env.TEMPLATE_PATH }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
-          parameter-overrides: InstanceType=${{ inputs.instance_type }}
+          parameter-overrides: "InstanceType=${{ inputs.instance_type }},ImageId=${{ steps.ami.outputs.ami_id }}"
           no-fail-on-empty-changeset: '1'
 
       - name: Destroy stack

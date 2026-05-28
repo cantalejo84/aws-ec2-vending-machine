@@ -48,7 +48,7 @@ jobs:
           # AMIs pinned for eu-west-1, x86_64. Update manually to pick up newer images.
           case "${{ inputs.os }}" in
             amazon-linux) AMI_ID=ami-03a25ed280b358f5b ;;     # Amazon Linux 2023
-            ubuntu)       AMI_ID=ami-0de864d6a3bd20ea8 ;;     # Ubuntu 26.04 LTS
+            ubuntu)       AMI_ID=ami-0354b051078d198b4 ;;     # Ubuntu 24.04 LTS
           esac
           echo "Selected AMI for ${{ inputs.os }}: $AMI_ID"
           echo "ami_id=$AMI_ID" >> "$GITHUB_OUTPUT"

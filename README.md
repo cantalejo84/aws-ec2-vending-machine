@@ -22,7 +22,7 @@ Region: `eu-west-1` (change `AWS_REGION` in the workflow to override).
 
 1. Switch to the branch for the EC2 type you want
 2. Actions → Deploy EC2 → Run workflow
-3. Set `stack_name`, `instance_type` and `os` (`amazon-linux` = Amazon Linux 2023, `ubuntu` = Ubuntu 26.04 LTS; both x86_64). AMI IDs are pinned in the workflow's `Resolve AMI` step — edit there to bump versions.
+3. Set `stack_name`, `instance_type` and `os` (`amazon-linux` = Amazon Linux 2023, `ubuntu` = Ubuntu 24.04 LTS; both x86_64). AMI IDs are pinned in the workflow's `Resolve AMI` step — edit there to bump versions.
 4. To tear down: same workflow with `action = destroy`
 
 ## Adding a new branch

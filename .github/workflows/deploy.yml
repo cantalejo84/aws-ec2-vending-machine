@@ -23,7 +23,11 @@ on:
         required: true
         default: 'amazon-linux'
         type: choice
-        options: [amazon-linux, ubuntu]
+        options: [amazon-linux, ubuntu, rhel9]
+      ami_id:
+        description: 'Override AMI ID (leave blank to use the OS default)'
+        required: false
+        default: ''
 
 env:
   AWS_REGION: eu-west-1
@@ -45,13 +49,31 @@ jobs:
         if: ${{ inputs.action == 'deploy' }}
         id: ami
         run: |
-          # AMIs pinned for eu-west-1, x86_64. Update manually to pick up newer images.
+          # Pinned defaults for eu-west-1, x86_64. Update manually to bump images.
           case "${{ inputs.os }}" in
-            amazon-linux) AMI_ID=ami-03a25ed280b358f5b ;;     # Amazon Linux 2023
-            ubuntu)       AMI_ID=ami-0354b051078d198b4 ;;     # Ubuntu 24.04 LTS
+            amazon-linux) DEFAULT_AMI=ami-03a25ed280b358f5b
+                          OS_VERSION="Amazon Linux 2023 (al2023-ami-2023.11.20260509.0-kernel-6.1-x86_64)" ;;
+            ubuntu)       DEFAULT_AMI=ami-0354b051078d198b4
+                          OS_VERSION="Ubuntu 24.04 LTS (ubuntu-noble-24.04-amd64-server-20260424)" ;;
+            rhel9)        DEFAULT_AMI=ami-04af76ffc52a7b0ad
+                          OS_VERSION="RHEL 9.8.0 (RHEL-9.8.0_HVM_GA-20260521-x86_64-0-Hourly2-GP3)" ;;
           esac
-          echo "Selected AMI for ${{ inputs.os }}: $AMI_ID"
+          AMI_ID="${{ inputs.ami_id }}"
+          if [ -z "$AMI_ID" ]; then
+            AMI_ID="$DEFAULT_AMI"
+          else
+            OS_VERSION="$OS_VERSION — overridden AMI"
+          fi
+          echo "OS:  ${{ inputs.os }} — $OS_VERSION"
+          echo "AMI: $AMI_ID"
           echo "ami_id=$AMI_ID" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Deploying EC2"
+            echo "- **OS**: ${{ inputs.os }} ($OS_VERSION)"
+            echo "- **AMI**: $AMI_ID"
+            echo "- **Instance type**: ${{ inputs.instance_type }}"
+            echo "- **Stack**: ${{ inputs.stack_name }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Deploy stack
         if: ${{ inputs.action == 'deploy' }}

@@ -15,9 +15,12 @@ Actions → Deploy EC2 → Run workflow:
 
 - `stack_name` — CloudFormation stack name
 - `instance_type` — `t3.micro` / `t3.small` / `t3.medium`
-- `os` — `amazon-linux` (Amazon Linux 2023) or `ubuntu` (Ubuntu 24.04 LTS), both x86_64
+- `os` — `amazon-linux` (Amazon Linux 2023), `ubuntu` (Ubuntu 24.04 LTS) or `rhel9` (RHEL 9.8.0), all x86_64
+- `ami_id` — optional override; leave blank to use the pinned default for the selected `os`
 
-Region is fixed to `eu-west-1`. AMI IDs are hardcoded in the workflow (see `Resolve AMI` step) — edit the workflow to bump to a newer image.
+The resolved OS version and AMI are printed in the `Resolve AMI` step log and in the run's job summary.
+
+Region is fixed to `eu-west-1`. Default AMI IDs per OS are pinned in the workflow (see `Resolve AMI` step) — edit the workflow to bump to a newer image, or pass `ami_id` for a one-off.
 
 ## Destroy
 
